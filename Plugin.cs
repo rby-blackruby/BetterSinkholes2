@@ -15,7 +15,6 @@ namespace BetterSinkholes
         public static bool EnableDebug;
 
         public static HarmonyInstance HarmonyInstance { set; get; }
-        private static uint HarmonyCounter = 0;
         public override void OnEnable()
         {
             Plugin.Info("Whatever.");
@@ -46,12 +45,6 @@ namespace BetterSinkholes
         public override void OnReload()
         {
             
-        }
-
-        public static void addDebug(string message)
-        {
-            if (Plugin.EnableDebug != true) return;
-            Plugin.Info(message);
         }
     }
 }
