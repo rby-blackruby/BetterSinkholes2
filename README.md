@@ -20,6 +20,6 @@ You can find the latest release [here](https://github.com/rby-blackruby/BetterSi
 | `bs_teleport_message_duration` | uint | 5 | The duration of the sinkhole teleport message, when teleport message is not null. |
 
 ## Thank you!
-Special thanks to [RogerFK](https://github.com/RogerFK/) and [SomewhatSane](https://github.com/SomewhatSane/) for helping me with this project, check out ther GitHub pages too by clicking on their name!
+Special thanks to [RogerFK](https://github.com/RogerFK/) and [SomewhatSane](https://github.com/SomewhatSane/) for helping me with this project, check out their GitHub pages too by clicking on their name!
 
 Thank you for being interested in this plugin and I wish you a great time using it! If you have any ideas/problems feel free to contact me on discord: `blackruby#6053`
