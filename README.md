@@ -14,7 +14,7 @@ You can find the latest release [here](https://github.com/rby-blackruby/BetterSi
 | Config option | Value type | Default value | Description |
 | --- | --- | --- | --- |
 | `bs_enable` | bool | true | Enables the BetterSinkholes plugin. Set it to false to disable it. |
-| `bs_slow_distance` | float | 1.15 | The distance from the sinkhole where it starts slowing. Don't set it hiher than 1.15! |
+| `bs_slow_distance` | float | 1.15 | The distance from the sinkhole where it starts slowing. Don't set it higher than 1.15! |
 | `bs_teleport_distance` | float | 0.7 | The distance from the sinkhole where it teleports you to the pocket dimension. Set it higher than 0!|
 | `bs_teleport_message` | string | null | Set it to null to disable sinkhole teleport message. Can use Unity's RichText. |
 | `bs_teleport_message_duration` | uint | 5 | The duration of the sinkhole teleport message, when teleport message is not null. |
