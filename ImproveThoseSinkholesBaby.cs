@@ -1,8 +1,9 @@
 ﻿using Mirror;
 using UnityEngine;
-using Harmony;
+using HarmonyLib;
 using RemoteAdmin;
 using System;
+using Exiled.API.Features;
 
 namespace BetterSinkholes
 {
@@ -12,44 +13,64 @@ namespace BetterSinkholes
         public static bool Prefix(SinkholeEnvironmentalHazard __instance, GameObject player)
         {
             
-            if (!NetworkServer.active)
-            {
-                return false;
-            }
+            // Check if player has a connection to the server.
+            if (!NetworkServer.active) return false;
 
-            PlayerEffectsController componentInParent = player.GetComponentInParent<PlayerEffectsController>();
-            if(componentInParent == null)
-            {
-                return false;
-            }
+            global::PlayerEffectsController componentInParent = player.GetComponentInParent<global::PlayerEffectsController>();
+            if(componentInParent == null) return false;
 
-            if ((double)Vector3.Distance(player.transform.position, __instance.transform.position) > (double)__instance.DistanceToBeAffected * Plugin.SlowDistance)
-            {
-                componentInParent.DisableEffect("SinkHole");
-                return false;
-            }
+            componentInParent.GetEffect<CustomPlayerEffects.SinkHole>();
 
+            // Check if the player walking into a sinkhole is an SCP or not.
             if(__instance.SCPImmune)
             {
-                CharacterClassManager component = player.GetComponent<CharacterClassManager>();
-                if(component == null || component.IsAnyScp())
-                {
-                    return false;
-                }
+                global::CharacterClassManager component = player.GetComponent<global::CharacterClassManager>();
+                if(component == null || component.IsAnyScp()) return false;
             }
 
-            if (Plugin.EnableBetterSinkholes && (double)Vector3.Distance(player.transform.position, __instance.transform.position) < (double)__instance.DistanceToBeAffected * Plugin.TeleportDistance)
+            // Check if player is in god mode.
+            Player ply = Player.Get(player);
+            if (ply.IsGodModeEnabled) return false;
+
+            // If a player is out of a sinkhole's range.
+            if ((double)Vector3.Distance(player.transform.position, __instance.transform.position) > (double)__instance.DistanceToBeAffected * BetterSinkholes.config.SlowDistance)
             {
-                player.GetComponent<PlyMovementSync>().OverridePosition(Vector3.down * 1998.5f, 0f, true);
-                PlayerEffectsController componentInParent2 = player.GetComponentInParent<PlayerEffectsController>();
-                componentInParent2.DisableEffect("SinkHole");
-                componentInParent2.GetEffect<CustomPlayerEffects.Corroding>("Corroding").isInPd = true;
-                componentInParent2.EnableEffect("Corroding");
-                QueryProcessor.Localplayer.GetComponent<Broadcast>().TargetAddElement(player.gameObject.GetComponent<NetworkIdentity>().connectionToClient, Plugin.TeleportMessage, Plugin.TeleportMessageDuration, false);
+                // If player doesn't have a sinkhole effect don't remove it.
+                if (player.TryGetComponent<PlayerEffectsController>(out PlayerEffectsController pec))
+                {
+                    CustomPlayerEffects.SinkHole SinkholeEffect = pec.GetEffect<CustomPlayerEffects.SinkHole>();
+
+                    // // If the player has the sinkhole effect, remove it.
+                    if (SinkholeEffect != null && SinkholeEffect.Enabled)
+                        componentInParent.DisableEffect<CustomPlayerEffects.SinkHole>();
+
+                    return false;
+                }
+
                 return false;
             }
 
-            componentInParent.EnableEffect("SinkHole");
+            // Check distance from the sinkhole's center.
+            if ((double)Vector3.Distance(player.transform.position, __instance.transform.position) < (double)__instance.DistanceToBeAffected * BetterSinkholes.config.TeleportDistance)
+            {
+                // Remove Sinkhole effect once falling into a sinkhole.
+                componentInParent.DisableEffect<CustomPlayerEffects.SinkHole>();
+
+                // Teleport player once walking too close to the center of a sinkhole.
+                ReferenceHub referenceHub = global::ReferenceHub.GetHub(player);
+                referenceHub.playerMovementSync.OverridePosition(Vector3.down * 1998.5f, 0f, true);
+
+                // Apply corrosion effect.
+                global::PlayerEffectsController playerEffectsController = referenceHub.playerEffectsController;
+                playerEffectsController.GetEffect<CustomPlayerEffects.Corroding>().IsInPd = true;
+                playerEffectsController.EnableEffect<CustomPlayerEffects.Corroding>(0f, false);
+
+                // Send player a broadcast specified in the configs. Default: "" for 0U duration.
+                QueryProcessor.Localplayer.GetComponent<Broadcast>().TargetAddElement(player.gameObject.GetComponent<NetworkIdentity>().connectionToClient, BetterSinkholes.config.TeleportMessage, BetterSinkholes.config.TeleportMessageDuration, Broadcast.BroadcastFlags.Normal);
+                return false;
+            }
+
+            componentInParent.EnableEffect<CustomPlayerEffects.SinkHole>(0f, false);
             return false;
         }
     }
